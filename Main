@@ -77,8 +77,12 @@ public class Main
 
                     String[] dates = DateFinder.getDate(input);
                     //System.out.println("created array");
-                    DateClass date = DateFinder.dateCreator(dates[0]);
-                    calendar.getEventsOnDay(date);
+                    if(dates.length==0)
+                        System.out.println("There are no events that day");
+                    else {
+                        DateClass date = DateFinder.dateCreator(dates[0]);
+                        calendar.getEventsOnDay(date);
+                    }
                 }
                 catch (Exception e) {
                     //System.out.println("Did not work");
