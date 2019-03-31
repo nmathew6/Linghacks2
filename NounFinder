@@ -1,0 +1,116 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.ArrayList;
+
+import opennlp.tools.cmdline.parser.ParserTool;
+import opennlp.tools.parser.Parse;
+import opennlp.tools.parser.Parser;
+import opennlp.tools.parser.ParserFactory;
+import opennlp.tools.parser.ParserModel;
+
+//extract noun phrases from a single sentence using OpenNLP
+public class NounFinder {
+
+    //static String sentence = "Scehdule a appointment on April 6 2019";
+
+    static Set<String> nounPhrases = new HashSet<>();
+
+    public static ArrayList<String> getNouns(String sentence) {
+
+        ArrayList<String> rv = new ArrayList<>();
+
+        InputStream modelInParse = null;
+        try {
+            //load chunking model
+            modelInParse = new FileInputStream("/Users/nathanmathew/IdeaProjects/Linghacks/src/input/en-parser-chunking.bin"); //from http://opennlp.sourceforge.net/models-1.5/
+            ParserModel model = new ParserModel(modelInParse);
+
+            //create parse tree
+            Parser parser = ParserFactory.create(model);
+            Parse topParses[] = ParserTool.parseLine(sentence, parser, 1);
+
+            //call subroutine to extract noun phrases
+            for (Parse p : topParses)
+                getNounPhrases(p);
+
+            //print noun phrases
+            for (String s : nounPhrases)
+                rv.add(s);
+
+            //The Call
+            //the Wild?
+            //The Call of the Wild? //punctuation remains on the end of sentence
+            //the author of The Call of the Wild?
+            //the author
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (modelInParse != null) {
+                try {
+                    modelInParse.close();
+                }
+                catch (IOException e) {
+                }
+            }
+        }
+
+        return rv;
+    }
+
+    //recursively loop through tree, extracting noun phrases
+    public static void getNounPhrases(Parse p) {
+
+        if (p.getType().equals("NP")) { //NP=noun phrase
+            nounPhrases.add(p.getCoveredText());
+        }
+        for (Parse child : p.getChildren())
+            getNounPhrases(child);
+    }
+
+    public static ArrayList<String> eliminateNouns(ArrayList<String> n)
+    {
+        ArrayList<String> nouns = new ArrayList<>(n);
+        char[] chars;
+        String rv;
+        boolean temp;
+        String noun;
+
+        for (int i = 0; i < nouns.size(); i++)
+        {
+            noun = nouns.get(i);
+            chars = noun.toCharArray();
+
+            if (noun.contains("add") || noun.contains("schedule"))
+                nouns.remove(noun);
+            else
+                for (char c : chars)
+                    if(Character.isDigit(c))
+                        nouns.set(i, "");
+
+            if (noun.contains("add") || noun.contains("schedule"))
+                nouns.set(i, "");
+        }
+
+        while(nouns.contains(""))
+            nouns.remove("");
+
+        if (nouns.size() == 1)
+            rv = nouns.get(0);
+        else
+            rv = null;
+
+        nouns.add(nouns.size(), nouns.size()+ "");
+        return nouns;
+    }
+
+
+
+
+
+
+}
