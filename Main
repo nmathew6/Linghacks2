@@ -1,0 +1,112 @@
+package com.company;
+
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Random;
+
+public class Main
+{
+
+    //private static String[] temp1 = {"Hi", "Hello", "Hi there!"};
+    // private static String[] inquries = {"What do you do", "What can you do", "Help"};
+    //private static String[] responses = {"Event created. Have fun!", "Event created successfully"};
+    //private static String[] stop = {"Thanks", "Bye", "QUIT"};
+
+    private static ArrayList<String> inquiries = new ArrayList<>();
+    private static ArrayList<String> greetings = new ArrayList<>();
+    private static ArrayList<String> responses = new ArrayList<>();
+    private static ArrayList<String> stop = new ArrayList<>();
+
+
+    public static void main(String[] args)
+    {
+        greetings.add("hi");
+        greetings.add("hello!");
+        greetings.add("hi there!");
+
+        inquiries.add("what do you do?");
+        inquiries.add("what can you do?");
+        inquiries.add("help");
+
+        responses.add("Event created. Have fun!");
+        responses.add("Event created successfully");
+
+        stop.add("thanks");
+        stop.add("bye");
+        stop.add("quit");
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("I am Calendar Bot! Use me to schedule events to your calendar. Ask me what I can do!");
+       // String input = sc.nextLine();
+
+        Organizer calendar = new Organizer();
+
+        while (true)
+        {
+            String input = sc.nextLine().toLowerCase();
+
+            if (inquiries.contains(input))
+            {
+                System.out.println("To quit, you enter “QUIT”. " +
+                        "The bot will also quit at the natural end of the conversation. " +
+                        "To add an event, simply type a sentence asking. No formatting, just say it!");
+            }
+
+            else if (stop.contains(input)) {
+                break;
+            }
+
+            else if (greetings.contains(input))
+            {
+                Random rand = new Random();
+                System.out.println(greetings.get(rand.nextInt(2)));
+            }
+
+            else
+            {
+                Event e = createEvent(input);
+                Random rand = new Random();
+
+                if (e != null)
+                {
+                    calendar.addEvent(e);
+                    System.out.println(responses.get(rand.nextInt(2)));
+                }
+                else {
+                    System.out.println("Sorry, something went wrong.");
+                }
+            }
+
+        }
+    }
+
+    public static Event createEvent(String input)
+    {
+        String[] dates;
+        Event rv;
+
+        try {
+            dates = DateFinder.getDate(input);
+            System.out.println("created array");
+            if (dates.length == 0) {return null;}
+            DateClass dateOfEvent = DateFinder.dateCreator(dates[0]);
+            System.out.println("next array");
+            ArrayList<String> subjectOfEvent = NounFinder.getNouns(input);
+            System.out.println("created second array");
+            ArrayList<String> newNouns = NounFinder.eliminateNouns(subjectOfEvent);
+            System.out.println("created third array");
+            System.out.println(newNouns.get(0));
+            rv = new Event(newNouns.get(0), dateOfEvent);
+//            if (Integer.parseInt(subjectOfEvent.get(1))>1) {return null;}
+//            else
+                rv = new Event(subjectOfEvent.get(0), dateOfEvent);
+        }
+        catch (Exception e) {
+            System.out.println("Did not work");
+            System.out.println(e);
+            rv = null;
+        }
+        return rv;
+    }
+}
