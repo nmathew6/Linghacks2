@@ -13,14 +13,22 @@ public class Main
     //private static String[] responses = {"Event created. Have fun!", "Event created successfully"};
     //private static String[] stop = {"Thanks", "Bye", "QUIT"};
 
+
+
     private static ArrayList<String> inquiries = new ArrayList<>();
     private static ArrayList<String> greetings = new ArrayList<>();
     private static ArrayList<String> responses = new ArrayList<>();
     private static ArrayList<String> stop = new ArrayList<>();
+    private static ArrayList<String> access = new ArrayList<>();
 
 
     public static void main(String[] args)
     {
+        access.add("what's on my calendar");
+        access.add("what do i have");
+        access.add("what is on my calendar");
+
+
         greetings.add("hi");
         greetings.add("hello!");
         greetings.add("hi there!");
@@ -63,6 +71,21 @@ public class Main
                 System.out.println(greetings.get(rand.nextInt(2)));
             }
 
+            else if (input.contains(access.get(0)) || input.contains(access.get(1)) || input.contains(access.get(2)))
+            {
+                try {
+
+                    String[] dates = DateFinder.getDate(input);
+                    //System.out.println("created array");
+                    DateClass date = DateFinder.dateCreator(dates[0]);
+                    calendar.getEventsOnDay(date);
+                }
+                catch (Exception e) {
+                    //System.out.println("Did not work");
+                    System.out.println(e);
+                }
+            }
+
             else
             {
                 Event e = createEvent(input);
@@ -89,13 +112,14 @@ public class Main
         try {
             dates = DateFinder.getDate(input);
             System.out.println("created array");
-            if (dates.length == 0) {return null;}
+            if (dates.length == 0) {System.out.println("There are no events that day" );
+            return null;}
             DateClass dateOfEvent = DateFinder.dateCreator(dates[0]);
-            System.out.println("next array");
+            //System.out.println("next array");
             ArrayList<String> subjectOfEvent = NounFinder.getNouns(input);
-            System.out.println("created second array");
+            //System.out.println("created second array");
             ArrayList<String> newNouns = NounFinder.eliminateNouns(subjectOfEvent);
-            System.out.println("created third array");
+            //System.out.println("created third array");
             System.out.println(newNouns.get(0));
             rv = new Event(newNouns.get(0), dateOfEvent);
 //            if (Integer.parseInt(subjectOfEvent.get(1))>1) {return null;}
@@ -103,8 +127,11 @@ public class Main
                 rv = new Event(subjectOfEvent.get(0), dateOfEvent);
         }
         catch (Exception e) {
-            System.out.println("Did not work");
-            System.out.println(e);
+
+            //System.out.println("Did not work");
+            if(e.toString()=="java.lang.ArrayIndexOutOfBoundsException: 0")
+                System.out.println("There are no events");
+            //System.out.println(e);
             rv = null;
         }
         return rv;
